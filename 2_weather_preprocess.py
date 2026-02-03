@@ -50,3 +50,33 @@ df.to_csv("./data/weather_cleaned.csv", index=0)
 df = pd.read_csv("./data/weather_cleaned.csv")
 df
 #%%
+### 과거 기상데이터 추출
+features = [
+    '평균기온(°C)', '최고기온(°C)', '최저기온(°C)',
+    '평균 풍속(m/s)', 
+    '평균 상대습도(%)',
+    '합계 일조시간(hr)',
+]
+
+MAX_LAG = 7
+df_list = []
+for region in df['지점명'].unique():
+    tmp_df = df.loc[df['지점명'] == region].sort_values('일시')
+
+    for col in features:
+        for lag in range(1, MAX_LAG+1):
+            tmp_df[f"{col}(lag{lag})"] = tmp_df[col].shift(lag)
+    
+    ### 처음 7개의 행은 과거 7개의 정보가 모두 있지 않기 때문에, NaN 존재 --> 삭제
+    tmp_df = tmp_df.dropna().reset_index(drop=True)
+
+    ### data leakage를 막기 위해, t시점(현재시점)의 정보는 삭제
+    tmp_df = tmp_df.drop(columns=features)
+
+    df_list.append(tmp_df)
+
+df = pd.concat(df_list).reset_index(drop=True)
+df
+
+df.to_csv("./data/weather_cleaned_lag.csv", index=0)
+#%%
