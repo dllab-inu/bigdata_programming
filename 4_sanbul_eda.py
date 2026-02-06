@@ -9,11 +9,11 @@ plt.rcParams["axes.unicode_minus"] = False
 df = pd.read_csv("./data/reg_data.csv", parse_dates=['일시', '발생일시', '진화종료시간'])
 df.head()
 
-num_cols = df.select_dtypes(include='number').columns
-obj_cols = df.select_dtypes(include=['object', 'string']).columns
+num_cols = df.select_dtypes(include='number').columns # 수치형 변수
+obj_cols = df.select_dtypes(include=['object', 'string']).columns # 문자형 변수
 #%%
 # 기초통계량 확인하기 (수치형 변수에만 적용 가능)
-df[num_cols].describe()
+print(df[num_cols].describe())
 #%%
 # df['피해면적_합계'].hist() # 가장 심플한 방법
 
@@ -75,7 +75,7 @@ cause_summary = (
     df.groupby('발생원인_구분')['피해면적_합계']
         .agg(['count', 'sum', 'mean', 'median', 'max'])
 ).reset_index()
-print(cause_summary.round(3))
+print(cause_summary.round(3)) # 소수점 3자리 반올림
 #%%
 plt.figure(figsize=(6, 4))
 df.boxplot(
@@ -128,7 +128,6 @@ df.boxplot(
     column='log_피해면적',
     by='월',
     grid=True,
-    showfliers=True,
 
     boxprops=dict(linewidth=1.8),
     whiskerprops=dict(linewidth=1.5),
@@ -154,6 +153,35 @@ df['진화소요시간_분'].hist()
 np.log(df['진화소요시간_분']).hist()
 np.exp(4.5)
 #%%
+weather_lag_cols = [x for x in num_cols if 'lag' in x] # 기상변수만을 추출
+
+color_map = {
+    '평균기온(°C)': 'tab:blue',
+    '최고기온(°C)': 'tab:blue',
+    '최저기온(°C)': 'tab:blue',
+    '평균 상대습도(%)': 'tab:orange',
+    '합계 일조시간(hr)': 'tab:green',
+    '평균 풍속(m/s)': 'tab:red'
+}
+
+df[weather_lag_cols + ['log_피해면적']].corr()
+
+corr_log = (
+    df[weather_lag_cols + ['log_피해면적']].corr()['log_피해면적']
+        .drop('log_피해면적')
+        .sort_values(key=abs, ascending=False)
+)
+colors = [color_map.get(c.split('(lag')[0]) for c in corr_log.index]
+
+plt.figure(figsize=(6, 12))
+corr_log.plot(kind='barh', color=colors, fontsize=13)
+plt.title("피해면적과의 상관계수 (절댓값 기준 정렬)", fontsize=15)
+plt.grid(axis='x', alpha=0.5, linestyle='--')
+plt.tight_layout()
+plt.savefig("./fig/4_sanbul_corr.png")
+plt.show()
+plt.close()
+#%%
 weather_cols = sorted(list(set([x.split('(lag')[0] for x in num_cols if 'lag' in x])))
 
 # for col in weather_cols:
@@ -176,32 +204,6 @@ ax[1].grid(alpha=0.3)
 
 plt.tight_layout()
 plt.savefig("./fig/4_sanbul_scatter_plot.png")
-plt.show()
-plt.close()
-#%%
-weather_lag_cols = [x for x in num_cols if 'lag' in x]
-
-color_map = {
-    '평균기온(°C)': 'tab:blue',
-    '최고기온(°C)': 'tab:blue',
-    '최저기온(°C)': 'tab:blue',
-    '평균 상대습도(%)': 'tab:orange',
-    '합계 일조시간(hr)': 'tab:green',
-    '평균 풍속(m/s)': 'tab:red'
-}
-corr_log = (
-    df[weather_lag_cols + ['log_피해면적']].corr()['log_피해면적']
-        .drop('log_피해면적')
-        .sort_values(key=abs, ascending=False)
-)
-colors = [color_map.get(c.split('(lag')[0]) for c in corr_log.index]
-
-plt.figure(figsize=(6, 12))
-corr_log.plot(kind='barh', color=colors, fontsize=13)
-plt.title("피해면적과의 상관계수 (절댓값 기준 정렬)", fontsize=15)
-plt.grid(axis='x', alpha=0.5, linestyle='--')
-plt.tight_layout()
-plt.savefig("./fig/4_sanbul_corr.png")
 plt.show()
 plt.close()
 #%%
