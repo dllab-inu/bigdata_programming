@@ -116,7 +116,3 @@ df.to_csv("./data/sanbul_cleaned.csv", index=0)
 df = pd.read_csv("./data/sanbul_cleaned.csv", parse_dates=['발생일시', '진화종료시간'])
 df
 #%%
-# ### 진화소요시간
-# df['진화소요시간_분'] = (df['진화종료시간'] - df['발생일시']).dt.total_seconds() / 60
-# df['진화소요시간_분']
-#%%
