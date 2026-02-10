@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Apple SD Gothic Neo"
 plt.rcParams["axes.unicode_minus"] = False
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 #%%
 ### 회귀모형에 사용할 데이터 EDA
 df = pd.read_csv("./data/reg_data.csv", parse_dates=['일시', '발생일시', '진화종료시간'])
@@ -89,6 +91,7 @@ df.boxplot(
     medianprops=dict(linewidth=2.5, color='red') # 중위수
 )
 plt.xticks(rotation=45, fontsize=14)
+plt.yticks(fontsize=14)
 plt.title("발생원인별 피해면적 분포", fontsize=16)
 plt.suptitle("")
 plt.xlabel("발생원인", fontsize=15)
@@ -112,6 +115,7 @@ df.boxplot(
     medianprops=dict(linewidth=2.5, color='red') # 중위수
 )
 plt.xticks(rotation=45, fontsize=14)
+plt.yticks(fontsize=14)
 plt.title("발생원인별 log(피해면적) 분포", fontsize=16)
 plt.suptitle("")
 plt.xlabel("발생원인", fontsize=15)
@@ -236,6 +240,53 @@ plt.xlabel("값")
 plt.grid(axis='x', linestyle='--', alpha=0.4)
 plt.tight_layout()
 plt.savefig("./fig/4_sanbul_weather_range.png")
+plt.show()
+plt.close()
+#%%
+### 변수들간의 강한 상관관계 구조 확인
+corr = df[weather_lag_cols].corr()
+
+plt.figure(figsize=(7, 6))
+plt.imshow(corr, aspect="auto")
+plt.title("상관계수 행렬", fontsize=16)
+plt.colorbar()
+plt.tight_layout()
+plt.savefig("./fig/4_sanbul_corrmat.png")
+plt.show()
+plt.close()
+#%%
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(df[weather_lag_cols]) # scaling: 표준화
+
+pca = PCA(random_state=42)
+pca.fit(X_scaled)
+
+explained_variance = pca.explained_variance_
+explained_variance_ratio = pca.explained_variance_ratio_
+cumulative_ratio = np.cumsum(explained_variance_ratio)
+
+threshold = 0.80
+pca_num = (cumulative_ratio < threshold).sum()
+cumulative_ratio[pca_num]
+
+# Scree Plot
+fig, axes = plt.subplots(1, 2, figsize=(10, 4), sharex=True)
+axes[0].plot(range(1, len(explained_variance) + 1), explained_variance)
+axes[0].set_title("설명되는 분산의 크기", fontsize=15)
+axes[0].set_xlabel("주성분", fontsize=14)
+axes[0].set_ylabel("분산", fontsize=14)
+axes[0].grid(alpha=0.3)
+axes[1].plot(range(1, len(cumulative_ratio) + 1), cumulative_ratio)
+axes[1].axvline(pca_num+1, linestyle='--', color='red', label=f'주성분개수: {pca_num+1}')
+axes[1].set_title("설명되는 분산 비율의 누적합", fontsize=15)
+axes[1].set_xlabel("주성분", fontsize=14)
+axes[1].set_ylabel("비율", fontsize=14)
+axes[1].grid(alpha=0.3)
+axes[1].legend(fontsize=14)
+for ax in axes:
+    ax.tick_params(axis='both', labelsize=14)
+plt.tight_layout()
+plt.savefig("./fig/4_sanbul_pca.png")
 plt.show()
 plt.close()
 #%%
