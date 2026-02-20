@@ -161,8 +161,8 @@ temp_coefs = pd.Series(
     index=temp_lag_cols
 ).sort_values(key=np.abs, ascending=False) # 절댓값 기준으로 내림차순 정렬
 #%%
-plt.figure(figsize=(8, 7))
-temp_coefs.plot(kind="barh")
+plt.figure(figsize=(7, 3))
+temp_coefs.plot(kind="bar")
 plt.title("기온지수", fontsize=14)
 plt.xlabel("주성분 계수", fontsize=14)
 plt.grid(alpha=0.3)

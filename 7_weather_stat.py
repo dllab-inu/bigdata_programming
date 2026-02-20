@@ -31,7 +31,7 @@ for col in num_cols:
     ttest_p[col] = pvalue
 ttest_df = pd.DataFrame({"p_value": pd.Series(ttest_p)}).sort_values("p_value")
 print(ttest_df)
-
+#%%
 alpha = 0.05 # 유의수준
 print(ttest_df.loc[ttest_df['p_value'] < alpha].round(4)) # 평균에서 유의한 차이를 보이는 변수
 print(ttest_df.loc[ttest_df['p_value'] > alpha].round(4)) # 평균에서 유의미한 차이를 보이지 못하는 변수
@@ -58,139 +58,82 @@ plt.savefig("./fig/7_weather_logpvalue.png")
 plt.show()
 plt.close()
 #%%
-### 단순 평균의 차이가 아니라, 분포의 차이를 확인
-col_min = '최저기온(°C)(lag3)' # 가장 작은 p-value를 갖는 기상변수
-col_max = '평균 풍속(m/s)(lag1)' # 가장 큰 p-value를 갖는 기상변수
-
-fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-df.boxplot(
-    column=col_min,
-    by='target',
-    grid=True,
-    
-    boxprops=dict(linewidth=2, color='tab:blue'), # 박스
-    whiskerprops=dict(linewidth=2, color='tab:blue'), # 수염
-    capprops=dict(linewidth=2, color='black'), # 최상(하)단 가로선
-    medianprops=dict(linewidth=2.5, color='red'), # 중위수
-    ax=axes[0]
-)
-axes[0].set_xlabel("발생여부", fontsize=14)
-axes[0].set_ylabel(f"{col_min}", fontsize=14)
-axes[0].grid(alpha=0.3)
-axes[0].set_title("")
-df.boxplot(
-    column=col_max,
-    by='target',
-    grid=True,
-    
-    boxprops=dict(linewidth=2, color='tab:blue'), # 박스
-    whiskerprops=dict(linewidth=2, color='tab:blue'), # 수염
-    capprops=dict(linewidth=2, color='black'), # 최상(하)단 가로선
-    medianprops=dict(linewidth=2.5, color='red'), # 중위수
-    ax=axes[1]
-)
-axes[1].set_xlabel("발생여부", fontsize=14)
-axes[1].set_ylabel(f"{col_max}", fontsize=14)
-axes[1].grid(alpha=0.3)
-axes[1].set_title("")
-plt.suptitle("")
-plt.tight_layout()
-plt.savefig("./fig/7_weather_boxplot.png")
-plt.show()
-plt.close()
-#%%
-fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-axes[0].hist(
-    df[df['target'] == 0][col_min], 
-    bins='auto', alpha=0.5, label="Class 0")
-axes[0].hist(
-    df[df['target'] == 1][col_min], 
-    bins='auto', alpha=0.5, label="Class 1")
-axes[0].set_xlabel("")
-axes[0].set_ylabel(f"{col_min}", fontsize=14)
-axes[0].grid(alpha=0.3)
-axes[0].set_title(f"발생여부에 따른 {col_min}의 분포 - 히스토그램", fontsize=15)
-axes[0].legend(fontsize=13)
-
-axes[1].hist(
-    df[df['target'] == 0][col_max], 
-    bins='auto', alpha=0.5, label="Class 0")
-axes[1].hist(
-    df[df['target'] == 1][col_max], 
-    bins='auto', alpha=0.5, label="Class 1")
-axes[1].set_xlabel("")
-axes[1].set_ylabel(f"{col_max}", fontsize=14)
-axes[1].grid(alpha=0.3)
-axes[1].set_title(f"발생여부에 따른 {col_max}의 분포 - 히스토그램", fontsize=15)
-axes[1].legend(fontsize=13)
-
-plt.tight_layout()
-plt.savefig("./fig/7_weather_hist.png")
-plt.show()
-plt.close()
-#%%
-fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-axes[0].hist(
-    df[df['target'] == 0][col_min], 
-    bins='auto', alpha=0.5, label="Class 0", density=True)
-axes[0].hist(
-    df[df['target'] == 1][col_min], 
-    bins='auto', alpha=0.5, label="Class 1", density=True)
-axes[0].set_xlabel("")
-axes[0].set_ylabel(f"{col_min}", fontsize=14)
-axes[0].grid(alpha=0.3)
-axes[0].set_title(f"발생여부에 따른 {col_min}의 분포 - 밀도함수", fontsize=15)
-axes[0].legend(fontsize=13)
-
-axes[1].hist(
-    df[df['target'] == 0][col_max], 
-    bins='auto', alpha=0.5, label="Class 0", density=True)
-axes[1].hist(
-    df[df['target'] == 1][col_max], 
-    bins='auto', alpha=0.5, label="Class 1", density=True)
-axes[1].set_xlabel("")
-axes[1].set_ylabel(f"{col_max}", fontsize=14)
-axes[1].grid(alpha=0.3)
-axes[1].set_title(f"발생여부에 따른 {col_max}의 분포 - 밀도함수", fontsize=15)
-axes[1].legend(fontsize=13)
-
-plt.tight_layout()
-plt.savefig("./fig/7_weather_density.png")
-plt.show()
-plt.close()
-#%%
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(df[num_cols]) # scaling: 표준화
 
-pca = PCA(random_state=42)
+pca = PCA()
 pca.fit(X_scaled)
+X_score = pca.transform(X_scaled)
 
-explained_variance = pca.explained_variance_
-explained_variance_ratio = pca.explained_variance_ratio_
-cumulative_ratio = np.cumsum(explained_variance_ratio)
+pca.components_[0]
 
-threshold = 0.80
-pca_num = (cumulative_ratio < threshold).sum()
-cumulative_ratio[pca_num]
-
-# Scree Plot
-fig, axes = plt.subplots(1, 2, figsize=(10, 4), sharex=True)
-axes[0].plot(range(1, len(explained_variance) + 1), explained_variance)
-axes[0].set_title("설명되는 분산의 크기", fontsize=15)
-axes[0].set_xlabel("주성분", fontsize=14)
-axes[0].set_ylabel("분산", fontsize=14)
-axes[0].grid(alpha=0.3)
-axes[1].plot(range(1, len(cumulative_ratio) + 1), cumulative_ratio)
-axes[1].axvline(pca_num+1, linestyle='--', color='red', label=f'주성분개수: {pca_num+1}')
-axes[1].set_title("설명되는 분산 비율의 누적합", fontsize=15)
-axes[1].set_xlabel("주성분", fontsize=14)
-axes[1].set_ylabel("비율", fontsize=14)
-axes[1].grid(alpha=0.3)
-axes[1].legend(fontsize=14)
-for ax in axes:
-    ax.tick_params(axis='both', labelsize=14)
+plt.figure(figsize=(6, 5))
+label_map = {0: "미발생", 1: "산불발생"}
+for c in [0, 1]:
+    idx = (df['target'] == c)
+    plt.scatter(
+        X_score[idx, 0],
+        X_score[idx, 1],
+        s=50,
+        alpha=0.7,
+        label=label_map[c]
+    )
+plt.xlabel("PC1", fontsize=13)
+plt.ylabel("PC2", fontsize=13)
+plt.grid(alpha=0.3)
+plt.legend(fontsize=13)
 plt.tight_layout()
-plt.savefig("./fig/7_weather_pca.png")
+plt.savefig("./fig/7_weather_pca_scatter_target.png")
+plt.show()
+plt.close()
+#%%
+temp_lag_cols = [x for x in num_cols if '기온' in x] # 기온과 관련한 변수만을 추출
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(df[temp_lag_cols]) 
+
+pca = PCA(n_components=1) # 1개의 지수를 계산
+pca.fit(X_scaled)
+X_score = pca.transform(X_scaled) # 기온지수
+
+temp_coefs = pd.Series(
+    pca.components_[0, :],
+    index=temp_lag_cols
+).sort_values(key=np.abs, ascending=False) # 절댓값 기준으로 내림차순 정렬
+#%%
+plt.figure(figsize=(7, 3))
+temp_coefs.plot(kind="bar")
+plt.title("기온지수", fontsize=14)
+plt.xlabel("주성분 계수", fontsize=14)
+plt.grid(alpha=0.3)
+plt.tight_layout()
+plt.savefig("./fig/7_weather_temp_coef.png")
+plt.show()
+plt.close()
+#%%
+df['기온지수'] = X_score[:, 0]
+
+print(df.groupby('target')['기온지수'].mean().sort_values(ascending=False))
+#%%
+plt.figure(figsize=(6, 4))
+df.boxplot(
+    column='기온지수',
+    by='target',
+    grid=True,
+
+    boxprops=dict(linewidth=2, color='tab:blue'), # 박스
+    whiskerprops=dict(linewidth=2, color='tab:blue'), # 수염
+    capprops=dict(linewidth=2, color='black'), # 최상(하)단 가로선
+    medianprops=dict(linewidth=2.5, color='red') # 중위수
+)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.title("산불 발생여부별 기온지수 분포", fontsize=16)
+plt.suptitle("")
+plt.xlabel("발생여부", fontsize=15)
+plt.ylabel("기온지수", fontsize=15)
+plt.tight_layout()
+plt.savefig("./fig/7_weather_target_temp_pca_boxplot.png")
 plt.show()
 plt.close()
 #%%
