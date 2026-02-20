@@ -154,6 +154,7 @@ plt.close()
 # [주의] 설명변수로는 사용할 수 없는 변수
 df['진화소요시간_분'] = (df['진화종료시간'] - df['발생일시']).dt.total_seconds() / 60
 df['진화소요시간_분'].hist()
+
 np.log(df['진화소요시간_분']).hist()
 np.exp(4.5)
 #%%
@@ -252,41 +253,6 @@ plt.title("상관계수 행렬", fontsize=16)
 plt.colorbar()
 plt.tight_layout()
 plt.savefig("./fig/4_sanbul_corrmat.png")
-plt.show()
-plt.close()
-#%%
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(df[weather_lag_cols]) # scaling: 표준화
-
-pca = PCA(random_state=42)
-pca.fit(X_scaled)
-
-explained_variance = pca.explained_variance_
-explained_variance_ratio = pca.explained_variance_ratio_
-cumulative_ratio = np.cumsum(explained_variance_ratio)
-
-threshold = 0.80
-pca_num = (cumulative_ratio < threshold).sum()
-cumulative_ratio[pca_num]
-
-# Scree Plot
-fig, axes = plt.subplots(1, 2, figsize=(10, 4), sharex=True)
-axes[0].plot(range(1, len(explained_variance) + 1), explained_variance)
-axes[0].set_title("설명되는 분산의 크기", fontsize=15)
-axes[0].set_xlabel("주성분", fontsize=14)
-axes[0].set_ylabel("분산", fontsize=14)
-axes[0].grid(alpha=0.3)
-axes[1].plot(range(1, len(cumulative_ratio) + 1), cumulative_ratio)
-axes[1].axvline(pca_num+1, linestyle='--', color='red', label=f'주성분개수: {pca_num+1}')
-axes[1].set_title("설명되는 분산 비율의 누적합", fontsize=15)
-axes[1].set_xlabel("주성분", fontsize=14)
-axes[1].set_ylabel("비율", fontsize=14)
-axes[1].grid(alpha=0.3)
-axes[1].legend(fontsize=14)
-for ax in axes:
-    ax.tick_params(axis='both', labelsize=14)
-plt.tight_layout()
-plt.savefig("./fig/4_sanbul_pca.png")
 plt.show()
 plt.close()
 #%%
