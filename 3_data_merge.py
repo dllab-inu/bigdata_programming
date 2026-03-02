@@ -1,5 +1,7 @@
 #%%
 import pandas as pd
+
+from sklearn.model_selection import train_test_split
 #%%
 sanbul_df = pd.read_csv("./data/sanbul_cleaned.csv", parse_dates=['발생일시', '진화종료시간'])
 weather_df = pd.read_csv("./data/weather_cleaned_lag.csv", parse_dates=['일시'])
@@ -52,6 +54,15 @@ assert reg_df.isna().sum().sum() == 0 # 결측치 없음을 확인
 
 reg_df.to_csv("./data/reg_data.csv", index=0)
 #%%
+reg_train, reg_test = train_test_split(
+    reg_df, test_size=0.2, random_state=42
+)
+print(reg_train.shape)
+print(reg_test.shape)
+
+reg_train.to_csv("./data/reg_train_data.csv", index=0)
+reg_test.to_csv("./data/reg_test_data.csv", index=0)
+#%%
 ### 분류모형 적합을 위한 데이터 생성
 # 피해면적_합계가 NaN이 아니라는 것은, 산불이 발생했음을 의미
 merge_df['target'] = (~merge_df['피해면적_합계'].isna()).astype(float)
@@ -68,4 +79,13 @@ cls_df = merge_df[cls_cols + weather_cols]
 assert cls_df.isna().sum().sum() == 0 # 결측치 없음을 확인
 
 cls_df.to_csv("./data/cls_data.csv", index=0)
+#%%
+cls_train, cls_test = train_test_split(
+    cls_df, test_size=0.2, random_state=42,
+)
+print(cls_train.shape)
+print(cls_test.shape)
+
+cls_train.to_csv("./data/cls_train_data.csv", index=0)
+cls_test.to_csv("./data/cls_test_data.csv", index=0)
 #%%

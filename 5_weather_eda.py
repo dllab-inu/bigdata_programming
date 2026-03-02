@@ -4,12 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Apple SD Gothic Neo"
 plt.rcParams["axes.unicode_minus"] = False
-from scipy import stats
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
 #%%
 ### 분류모형에 사용할 데이터 EDA
-df = pd.read_csv("./data/cls_data.csv", parse_dates=['일시'])
+df = pd.read_csv("./data/cls_train_data.csv", parse_dates=['일시'])
 df.head()
 
 num_cols = list(df.select_dtypes(include='number').columns) # 수치형 변수

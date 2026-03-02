@@ -4,11 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "Apple SD Gothic Neo"
 plt.rcParams["axes.unicode_minus"] = False
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
 #%%
 ### 회귀모형에 사용할 데이터 EDA
-df = pd.read_csv("./data/reg_data.csv", parse_dates=['일시', '발생일시', '진화종료시간'])
+df = pd.read_csv("./data/reg_train_data.csv", parse_dates=['일시', '발생일시', '진화종료시간'])
 df.head()
 
 num_cols = df.select_dtypes(include='number').columns # 수치형 변수
