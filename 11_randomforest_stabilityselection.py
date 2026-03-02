@@ -71,7 +71,7 @@ ax.axvline(
     linewidth=2,
     label=f"threshold = {pi_thr}"
 )
-ax.set_title("RF Stability Selection: Selection Probabilities (Top 30)")
+ax.set_title("Stability Selection: Selection Probabilities (Top 30)")
 ax.set_xlabel("Selection probability")
 ax.legend(fontsize=12)
 plt.tight_layout()
