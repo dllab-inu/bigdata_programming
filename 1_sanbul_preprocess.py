@@ -44,6 +44,7 @@ df = df.drop([
 ### 발생장소 확인
 counts = df['발생장소_시도'].value_counts().sort_values(ascending=False)
 ratios = counts / counts.sum() * 100 # 전체에서 차지하는 비율을 계산
+# counts = df['발생장소_시도'].value_counts(normalize=True).sort_values(ascending=False) * 100
 print(counts)
 #%%
 plt.figure(figsize=(9, 4))
