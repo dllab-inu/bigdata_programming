@@ -68,7 +68,7 @@ prob = pd.Series(selection_prob, index=X.columns).sort_values(ascending=False)
 prob.head(20)
 #%%
 pi_thr = 0.7
-stable_selected = prob[prob >= pi_thr].sort_index()
+stable_selected = prob[prob >= pi_thr]
 print("최종적으로 선택된 변수 개수:", len(stable_selected))
 stable_selected
 #%%
@@ -108,51 +108,6 @@ y_test = df_test["target"]
 #%%
 y_test_prob = best_model.predict_proba(X_test)[:, 1]
 #%%
-plt.figure(figsize=(7, 6))
-plt.hist(
-    y_test_prob,
-    bins="sqrt",
-    alpha=0.7,
-    edgecolor="black"
-)
-plt.xlabel("산불이 발생할 확률", fontsize=15)
-plt.ylabel("Count", fontsize=15)
-plt.xticks(fontsize=14)
-plt.yticks(fontsize=14)
-plt.grid(alpha=0.5)
-plt.tight_layout()
-plt.savefig("./fig/15_cls_prob_hist.png")
-plt.show()
-plt.close()
-#%%
-plt.figure(figsize=(7, 6))
-plt.hist(
-    y_test_prob[y_test==0],
-    bins="sqrt",
-    alpha=0.7,
-    label="y=0",
-    density=True,
-    edgecolor="black"
-)
-plt.hist(
-    y_test_prob[y_test==1],
-    bins="sqrt",
-    alpha=0.7,
-    label="y=1",
-    density=True,
-    edgecolor="black"
-)
-plt.xlabel("산불이 발생할 확률", fontsize=15)
-plt.ylabel("Density", fontsize=15)
-plt.xticks(fontsize=14)
-plt.yticks(fontsize=14)
-plt.grid(alpha=0.5)
-plt.legend(fontsize=16)
-plt.tight_layout()
-plt.savefig("./fig/15_cls_prob_hist_bylabel.png")
-plt.show()
-plt.close()
-#%%
 t = 0.05
 y_pred = (y_test_prob >= t).astype(int)
 
@@ -170,9 +125,41 @@ print(f"F1 = {f1:.4f}")
 print(f"ROC-AUC = {roc_auc:.4f}")
 print(f"PR-AUC = {pr_auc:.4f}")
 #%%
+y_pred.sum()
+y_test.sum()
+#%%
 importance_df = pd.DataFrame({
     "설명변수(선택된)": stable_selected.index,
     "중요도": best_model.feature_importances_
 }).sort_values("중요도", ascending=False)
 print(importance_df)
+#%%
+plt.figure(figsize=(7, 6))
+plt.hist(
+    y_test_prob[y_test==0],
+    bins="sqrt",
+    alpha=0.7,
+    label="y=0",
+    density=True,
+    edgecolor="black"
+)
+plt.hist(
+    y_test_prob[y_test==1],
+    bins=10,
+    alpha=0.7,
+    label="y=1",
+    density=True,
+    edgecolor="black"
+)
+plt.axvline(t, linewidth=2, color='red', linestyle='--')
+plt.xlabel("산불이 발생할 확률", fontsize=15)
+plt.ylabel("Density", fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.grid(alpha=0.5)
+plt.legend(fontsize=16)
+plt.tight_layout()
+plt.savefig("./fig/15_cls_prob_hist_bylabel.png")
+plt.show()
+plt.close()
 #%%
